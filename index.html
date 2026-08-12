@@ -15,7 +15,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
-    <!-- Chart.js (Kept script loaded for when you want metrics back) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <!-- PapaParse for CSV -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
@@ -35,14 +35,13 @@
             <div class="nav-brand">
                 <span class="brand-icon">🌙</span>
                 <span class="brand-text">RestNTravel</span>
-                <span class="brand-badge">Sleep Data</span>
+                <span class="brand-badge">Sleep Comparator</span>
             </div>
             <div class="nav-links">
-                <!-- Metrics sections hidden for now -->
-                <!-- <a href="#overview" class="nav-pill" data-section="overview">Overview</a> -->
-                <!-- <a href="#charts" class="nav-pill" data-section="charts">Analytics</a> -->
-                <!-- <a href="#comparison" class="nav-pill" data-section="comparison">Comparison</a> -->
-                <a href="#dataset" class="nav-pill active" data-section="dataset">Dataset View</a>
+                <a href="#overview" class="nav-pill active" data-section="overview">Overview</a>
+                <a href="#charts" class="nav-pill" data-section="charts">Analytics</a>
+                <a href="#comparison" class="nav-pill" data-section="comparison">Comparison</a>
+                <a href="#dataset" class="nav-pill" data-section="dataset">Dataset</a>
             </div>
         </div>
     </nav>
@@ -51,16 +50,14 @@
     <header id="hero">
         <div class="hero-content">
             <div class="hero-badge">IoT Research Platform • 30-Day Study</div>
-            <h1>Sensor Dataset <span class="gradient-text">Viewer</span></h1>
-            <p class="hero-subtitle">Raw CSV data collected from the ESP32 IoT sensor comparing standard fiberfill vs
-                RestNTravel organic rice-grass pillow.</p>
+            <h1>Sleep Quality <span class="gradient-text">Before & After</span></h1>
+            <p class="hero-subtitle">Comparing objective sleep metrics between a standard fiberfill pillow and the
+                RestNTravel organic rice-grass pillow using ESP32 IoT sensor data.</p>
             <div class="hero-stats" id="hero-stats">
                 <div class="hero-stat loading-shimmer">
                     <span class="stat-value" id="stat-total-records">—</span>
                     <span class="stat-label">Total Records</span>
                 </div>
-
-                <!-- Hidden metric cards
                 <div class="hero-stat loading-shimmer">
                     <span class="stat-value" id="stat-before-avg-sqi">—</span>
                     <span class="stat-label">Avg SQI (Before)</span>
@@ -73,19 +70,114 @@
                     <span class="stat-value" id="stat-improvement">—</span>
                     <span class="stat-label">Improvement</span>
                 </div>
-                -->
             </div>
         </div>
     </header>
 
+    <!-- Disclaimer Banner -->
+    <div class="disclaimer-banner">
+        <div class="disclaimer-inner">
+            <span class="disclaimer-icon">ℹ️</span>
+            <p>Stage estimations and metrics are derived from surrogate commercial-grade sensors (PPG, IMU, FSR) — not
+                clinical polysomnography. Accuracy ceiling: Cohen's κ 0.4–0.7 vs gold-standard PSG.</p>
+        </div>
+    </div>
+
     <main>
-        <!-- HIDING METRIC SECTIONS FOR NOW AS REQUESTED -->
+        <!-- Section: Overview KPI Cards -->
+        <section id="overview" class="section">
+            <div class="section-header">
+                <h2>Key Metrics Overview</h2>
+                <p>Aggregated statistics from 750+ sensor readings across the 30-day study period.</p>
+            </div>
+            <div class="kpi-grid" id="kpi-grid">
+                <!-- Filled by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Charts -->
+        <section id="charts" class="section">
+            <div class="section-header">
+                <h2>Analytics Dashboard</h2>
+                <p>Visual exploration of sleep quality trends and distributions.</p>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card wide">
+                    <div class="chart-header">
+                        <h3>Sleep Quality Score — Daily Trend</h3>
+                        <span class="chart-badge">Time Series</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-sqi-trend"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Heart Rate Distribution</h3>
+                        <span class="chart-badge">Histogram</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-hr-dist"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Sleep Stage Composition</h3>
+                        <span class="chart-badge">Stacked</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-stages"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Sleep Duration Distribution</h3>
+                        <span class="chart-badge">Box Plot</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-duration"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Movement vs Sleep Quality</h3>
+                        <span class="chart-badge">Scatter</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-scatter"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Before vs After Comparison -->
+        <section id="comparison" class="section">
+            <div class="section-header">
+                <h2>Before vs After Comparison</h2>
+                <p>Side-by-side comparison of key sleep metrics between the standard pillow and RestNTravel organic
+                    pillow phases.</p>
+            </div>
+            <div class="comparison-grid" id="comparison-grid">
+                <!-- Filled by JS -->
+            </div>
+            <div class="charts-grid" style="margin-top: 2rem;">
+                <div class="chart-card wide">
+                    <div class="chart-header">
+                        <h3>Metric Comparison — Before vs After</h3>
+                        <span class="chart-badge">Radar</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart-radar"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Section: Dataset Table -->
         <section id="dataset" class="section">
             <div class="section-header">
-                <h2>Study Dataset</h2>
-                <p>Browse all IoT sensor readings from the 30-day before/after study. Click headers to sort.</p>
+                <h2>Full Dataset</h2>
+                <p>Browse all 750+ IoT sensor readings from the 30-day before/after study.</p>
             </div>
             <div class="table-controls">
                 <div class="search-box">
@@ -94,8 +186,8 @@
                 </div>
                 <div class="filter-group">
                     <button class="filter-btn active" data-filter="all" id="filter-all">All</button>
-                    <button class="filter-btn" data-filter="Before" id="filter-before">Standard Pillow (Before)</button>
-                    <button class="filter-btn" data-filter="After" id="filter-after">RestNTravel Pillow (After)</button>
+                    <button class="filter-btn" data-filter="Before" id="filter-before">Before</button>
+                    <button class="filter-btn" data-filter="After" id="filter-after">After</button>
                 </div>
                 <div class="pagination-info">
                     Showing <span id="showing-count">0</span> of <span id="total-count">0</span> records
@@ -124,9 +216,10 @@
         <div class="footer-inner">
             <div class="footer-brand">
                 <span class="brand-icon">🌙</span>
-                <span>RestNTravel Sleep Data</span>
+                <span>RestNTravel Sleep Comparator</span>
             </div>
             <p class="footer-note">Academic Research Platform • IoT + Full-Stack • August 2026</p>
+            <p class="footer-disclaimer">Data collected from ESP32-S3 with MPU6050, FSR, and MAX30102 sensors.</p>
         </div>
     </footer>
 
