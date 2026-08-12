@@ -58,23 +58,38 @@ function showError(msg) {
 
 // ─── DASHBOARD POPULATION ───
 function initDashboard() {
+    // 1. Calculate and populate top Hero Stats
+    const beforeData = globalData.filter(d => d.Phase === "Before");
+    const afterData = globalData.filter(d => d.Phase === "After");
+
+    const avgSqiBefore = mean(beforeData, "Sleep_Quality_Score");
+    const avgSqiAfter = mean(afterData, "Sleep_Quality_Score");
+    const improvement = ((avgSqiAfter - avgSqiBefore) / avgSqiBefore) * 100;
+
     // Remove shimmy loads
     document.querySelectorAll(".hero-stat").forEach(el => el.classList.remove("loading-shimmer"));
 
     // Update inner texts
     animateValue("stat-total-records", 0, globalData.length, 1000, 0);
+    animateValue("stat-before-avg-sqi", 0, avgSqiBefore, 1000, 1);
+    animateValue("stat-after-avg-sqi", 0, avgSqiAfter, 1000, 1);
 
-    // --- HIDDEN ALL METRICS/CHARTS PER USER REQUEST ---
-    // (Uncomment these if you want the charts back later!)
-    // const beforeData = globalData.filter(d => d.Phase === "Before");
-    // const afterData = globalData.filter(d => d.Phase === "After");
-    // renderKPIGrid(beforeData, afterData);
-    // renderComparisonGrid(beforeData, afterData);
-    // initCharts(beforeData, afterData);
+    const impEl = document.getElementById("stat-improvement");
+    impEl.textContent = `+${improvement.toFixed(1)}%`;
+    impEl.style.color = improvement > 0 ? "var(--accent-emerald)" : "var(--accent-rose)";
+
+    // 2. Generate KPI Grid
+    renderKPIGrid(beforeData, afterData);
+
+    // // 3. Generate Comparison Grid
+    renderComparisonGrid(beforeData, afterData);
 
     // 4. Initialize Data Table
     setupTable();
     updateTable();
+
+    // 5. Initialize Charts
+    initCharts(beforeData, afterData);
 }
 
 // ─── UTILITIES ───
@@ -97,6 +112,276 @@ function animateValue(id, start, end, duration, decimals = 0) {
         else obj.innerHTML = end.toFixed(decimals);
     };
     window.requestAnimationFrame(step);
+}
+
+// ─── UI GENERATORS ───
+function renderKPIGrid(before, after) {
+    const grid = document.getElementById("kpi-grid");
+
+    // Helper to calc improvement UI
+    const getChangeHtml = (valB, valA, invertGood = false) => {
+        const diff = valA - valB;
+        if (diff === 0) return '';
+        const pct = (diff / valB) * 100;
+        const isPositiveChange = diff > 0;
+        const isGood = invertGood ? !isPositiveChange : isPositiveChange;
+
+        return `<span class="kpi-change ${isGood ? 'positive' : 'negative'}">
+                    ${isPositiveChange ? '↑' : '↓'} ${Math.abs(pct).toFixed(1)}%
+                </span>`;
+    };
+
+    const overallQScore = mean(globalData, "Sleep_Quality_Score");
+    const avgDeep = mean(globalData, "Deep_Sleep_pct");
+    const avgDisturbBefore = mean(before, "Sleep_Disturbances");
+    const avgDisturbAfter = mean(after, "Sleep_Disturbances");
+
+    grid.innerHTML = `
+        <div class="kpi-card violet">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-value">${overallQScore.toFixed(1)}</div>
+            <div class="kpi-label">Cohort Avg Score</div>
+            ${getChangeHtml(mean(before, "Sleep_Quality_Score"), mean(after, "Sleep_Quality_Score"))}
+        </div>
+        <div class="kpi-card emerald">
+            <div class="kpi-icon">💤</div>
+            <div class="kpi-value">${avgDeep.toFixed(1)}%</div>
+            <div class="kpi-label">Cohor Avg Deep Sleep</div>
+            ${getChangeHtml(mean(before, "Deep_Sleep_pct"), mean(after, "Deep_Sleep_pct"))}
+        </div>
+        <div class="kpi-card amber">
+            <div class="kpi-icon">📉</div>
+            <div class="kpi-value">${mean(after, "Sleep_Disturbances").toFixed(1)}</div>
+            <div class="kpi-label">Avg Disturbances (After)</div>
+            ${getChangeHtml(avgDisturbBefore, avgDisturbAfter, true)}
+        </div>
+        <div class="kpi-card blue">
+            <div class="kpi-icon">⏱️</div>
+            <div class="kpi-value">${mean(after, "Sleep_Duration_hr").toFixed(2)}h</div>
+            <div class="kpi-label">Duration (After)</div>
+            ${getChangeHtml(mean(before, "Sleep_Duration_hr"), mean(after, "Sleep_Duration_hr"))}
+        </div>
+    `;
+}
+
+function renderComparisonGrid(before, after) {
+    const grid = document.getElementById("comparison-grid");
+
+    const metrics = [
+        { key: "Sleep_Quality_Score", label: "Sleep Quality Index", unit: "/ 100" },
+        { key: "Deep_Sleep_pct", label: "Deep Sleep Ratio", unit: "%" },
+        { key: "REM_Sleep_pct", label: "REM Sleep Ratio", unit: "%" },
+        { key: "Movement_Count", label: "Avg Night Movement", unit: "events", invert: true },
+        { key: "Heart_Rate_bpm", label: "Avg Heart Rate", unit: "BPM", invert: true },
+        { key: "Pressure_Index", label: "Cervical Pressure", unit: "index", invert: true }
+    ];
+
+    let html = '';
+    metrics.forEach(m => {
+        const valB = mean(before, m.key);
+        const valA = mean(after, m.key);
+        const diff = valA - valB;
+        const pct = (diff / valB) * 100;
+
+        let isGood = diff > 0;
+        if (m.invert) { isGood = diff < 0; }
+
+        const sign = diff >= 0 ? '+' : '';
+        const cl = isGood ? 'positive' : 'negative';
+
+        html += `
+            <div class="comparison-card">
+                <div class="comp-metric-name">${m.label}</div>
+                <div class="comp-values">
+                    <div class="comp-phase">
+                        <div class="comp-phase-label before">Phase 1 (Standard)</div>
+                        <div class="comp-phase-value">${valB.toFixed(1)}<span style="font-size:0.6em;color:var(--text-muted)">${m.unit}</span></div>
+                    </div>
+                    <div class="comp-arrow">→</div>
+                    <div class="comp-phase">
+                        <div class="comp-phase-label after">Phase 2 (Organic)</div>
+                        <div class="comp-phase-value">${valA.toFixed(1)}<span style="font-size:0.6em;color:var(--text-muted)">${m.unit}</span></div>
+                    </div>
+                </div>
+                <div class="comp-change">
+                    <span class="comp-change-value ${cl}">${sign}${pct.toFixed(2)}%</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted)">Change</span>
+                </div>
+            </div>
+        `;
+    });
+    grid.innerHTML = html;
+}
+
+// ─── CHARTS (Chart.js) ───
+function initCharts(before, after) {
+    Chart.defaults.color = "#94a3b8";
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.scale.grid.color = "rgba(255, 255, 255, 0.05)";
+    Chart.defaults.plugins.tooltip.backgroundColor = "rgba(10, 14, 26, 0.9)";
+    Chart.defaults.plugins.tooltip.titleColor = "#f1f5f9";
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.borderColor = "rgba(139, 92, 246, 0.4)";
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+    // 1. Daily Trend Line Chart
+    const trendCtx = document.getElementById('chart-sqi-trend').getContext('2d');
+    charts.trend = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: globalData.map((_, i) => `Rec ${i + 1}`),
+            datasets: [{
+                label: 'Sleep Quality Score',
+                data: globalData.map(d => d.Sleep_Quality_Score),
+                borderColor: '#a78bfa',
+                backgroundColor: 'rgba(167, 139, 250, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: globalData.map(d => d.Phase === 'Before' ? '#f59e0b' : '#10b981'),
+                pointBorderColor: 'transparent',
+                pointRadius: 3,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx) => `Score: ${ctx.raw} (${globalData[ctx.dataIndex].Phase})` } }
+            },
+            scales: { y: { suggestedMin: 30, suggestedMax: 100 } }
+        }
+    });
+
+    // 2. Heart Rate Distribution (Bar Chart by Buckets)
+    const hrBuckets = ["< 60", "60 - 64", "65 - 69", "70 - 74", "75+"];
+    const processHR = (data) => {
+        let counts = [0, 0, 0, 0, 0];
+        data.forEach(d => {
+            if (d.Heart_Rate_bpm < 60) counts[0]++;
+            else if (d.Heart_Rate_bpm < 65) counts[1]++;
+            else if (d.Heart_Rate_bpm < 70) counts[2]++;
+            else if (d.Heart_Rate_bpm < 75) counts[3]++;
+            else counts[4]++;
+        });
+        return counts;
+    };
+
+    const hrCtx = document.getElementById('chart-hr-dist').getContext('2d');
+    charts.hr = new Chart(hrCtx, {
+        type: 'bar',
+        data: {
+            labels: hrBuckets,
+            datasets: [
+                { label: 'Standard Pillow', data: processHR(before), backgroundColor: 'rgba(245, 158, 11, 0.7)' },
+                { label: 'Organic Pillow', data: processHR(after), backgroundColor: 'rgba(16, 185, 129, 0.7)' }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 3. Sleep Stage Composition (Stacked)
+    const stCtx = document.getElementById('chart-stages').getContext('2d');
+    charts.stages = new Chart(stCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Phase 1 (Standard)', 'Phase 2 (Organic)'],
+            datasets: [
+                { label: 'Deep Sleep', data: [mean(before, "Deep_Sleep_pct"), mean(after, "Deep_Sleep_pct")], backgroundColor: '#8b5cf6' },
+                { label: 'REM Sleep', data: [mean(before, "REM_Sleep_pct"), mean(after, "REM_Sleep_pct")], backgroundColor: '#3b82f6' },
+                { label: 'Light Sleep', data: [mean(before, "Light_Sleep_pct"), mean(after, "Light_Sleep_pct")], backgroundColor: '#64748b' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { stacked: true, max: 100 }
+            }
+        }
+    });
+
+    // 4. Sleep Duration 
+    const durCtx = document.getElementById('chart-duration').getContext('2d');
+    const bucketDur = (data) => {
+        let counts = [0, 0, 0, 0]; // <5, 5-6, 6-7, >7
+        data.forEach(d => {
+            if (d.Sleep_Duration_hr < 5.5) counts[0]++;
+            else if (d.Sleep_Duration_hr < 6) counts[1]++;
+            else if (d.Sleep_Duration_hr < 6.5) counts[2]++;
+            else counts[3]++;
+        });
+        return counts;
+    };
+    charts.duration = new Chart(durCtx, {
+        type: 'bar',
+        data: {
+            labels: ['< 5.5 hrs', '5.5 - 6 hrs', '6.0 - 6.5 hrs', '> 6.5 hrs'],
+            datasets: [
+                { label: 'Before', data: bucketDur(before), backgroundColor: 'rgba(245, 158, 11, 0.5)', borderColor: '#f59e0b', borderWidth: 1 },
+                { label: 'After', data: bucketDur(after), backgroundColor: 'rgba(16, 185, 129, 0.5)', borderColor: '#10b981', borderWidth: 1 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // 5. Scatter Movement vs SQI
+    const scatCtx = document.getElementById('chart-scatter').getContext('2d');
+    charts.scatter = new Chart(scatCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                { label: 'Before', data: before.map(d => ({ x: d.Movement_Count, y: d.Sleep_Quality_Score })), backgroundColor: 'rgba(245, 158, 11, 0.6)' },
+                { label: 'After', data: after.map(d => ({ x: d.Movement_Count, y: d.Sleep_Quality_Score })), backgroundColor: 'rgba(16, 185, 129, 0.6)' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { x: { title: { display: true, text: 'Movements (events)' } }, y: { title: { display: true, text: 'SQI Score' } } }
+        }
+    });
+
+    // 6. Radar Chart
+    const radarCtx = document.getElementById('chart-radar').getContext('2d');
+    charts.radar = new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+            labels: ['SQI Score', 'Avg Duration (hrs x10)', 'Deep Sleep %', 'REM Sleep %', 'Efficiency Proxy'],
+            datasets: [
+                {
+                    label: 'Standard Pillow',
+                    data: [
+                        mean(before, "Sleep_Quality_Score"),
+                        mean(before, "Sleep_Duration_hr") * 10,
+                        mean(before, "Deep_Sleep_pct"),
+                        mean(before, "REM_Sleep_pct"),
+                        100 - (mean(before, "Sleep_Disturbances") * 5)
+                    ],
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                    borderColor: '#f59e0b',
+                    pointBackgroundColor: '#f59e0b'
+                },
+                {
+                    label: 'Organic Pillow',
+                    data: [
+                        mean(after, "Sleep_Quality_Score"),
+                        mean(after, "Sleep_Duration_hr") * 10,
+                        mean(after, "Deep_Sleep_pct"),
+                        mean(after, "REM_Sleep_pct"),
+                        100 - (mean(after, "Sleep_Disturbances") * 5)
+                    ],
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    borderColor: '#10b981',
+                    pointBackgroundColor: '#10b981'
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { font: { size: 11 } } } }
+        }
+    });
 }
 
 // ─── TABLE LOGIC ───
