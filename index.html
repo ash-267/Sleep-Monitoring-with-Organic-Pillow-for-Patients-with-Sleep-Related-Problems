@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestNTravel Sleep Comparator — IoT Sleep Monitoring Dashboard</title>
+    <meta name="description"
+        content="IoT-powered 30-day sleep quality comparison dashboard. Compare Before vs After sleep metrics using the RestNTravel organic rice-grass pillow.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Chart.js (Kept script loaded for when you want metrics back) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <!-- PapaParse for CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Ambient background glow -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <!-- Navigation -->
+    <nav id="main-nav">
+        <div class="nav-inner">
+            <div class="nav-brand">
+                <span class="brand-icon">🌙</span>
+                <span class="brand-text">RestNTravel</span>
+                <span class="brand-badge">Sleep Data</span>
+            </div>
+            <div class="nav-links">
+                <!-- Metrics sections hidden for now -->
+                <!-- <a href="#overview" class="nav-pill" data-section="overview">Overview</a> -->
+                <!-- <a href="#charts" class="nav-pill" data-section="charts">Analytics</a> -->
+                <!-- <a href="#comparison" class="nav-pill" data-section="comparison">Comparison</a> -->
+                <a href="#dataset" class="nav-pill active" data-section="dataset">Dataset View</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="hero">
+        <div class="hero-content">
+            <div class="hero-badge">IoT Research Platform • 30-Day Study</div>
+            <h1>Sensor Dataset <span class="gradient-text">Viewer</span></h1>
+            <p class="hero-subtitle">Raw CSV data collected from the ESP32 IoT sensor comparing standard fiberfill vs
+                RestNTravel organic rice-grass pillow.</p>
+            <div class="hero-stats" id="hero-stats">
+                <div class="hero-stat loading-shimmer">
+                    <span class="stat-value" id="stat-total-records">—</span>
+                    <span class="stat-label">Total Records</span>
+                </div>
+
+                <!-- Hidden metric cards
+                <div class="hero-stat loading-shimmer">
+                    <span class="stat-value" id="stat-before-avg-sqi">—</span>
+                    <span class="stat-label">Avg SQI (Before)</span>
+                </div>
+                <div class="hero-stat loading-shimmer">
+                    <span class="stat-value" id="stat-after-avg-sqi">—</span>
+                    <span class="stat-label">Avg SQI (After)</span>
+                </div>
+                <div class="hero-stat loading-shimmer">
+                    <span class="stat-value" id="stat-improvement">—</span>
+                    <span class="stat-label">Improvement</span>
+                </div>
+                -->
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- HIDING METRIC SECTIONS FOR NOW AS REQUESTED -->
+
+        <!-- Section: Dataset Table -->
+        <section id="dataset" class="section">
+            <div class="section-header">
+                <h2>Study Dataset</h2>
+                <p>Browse all IoT sensor readings from the 30-day before/after study. Click headers to sort.</p>
+            </div>
+            <div class="table-controls">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="table-search" placeholder="Search records..." autocomplete="off">
+                </div>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all" id="filter-all">All</button>
+                    <button class="filter-btn" data-filter="Before" id="filter-before">Standard Pillow (Before)</button>
+                    <button class="filter-btn" data-filter="After" id="filter-after">RestNTravel Pillow (After)</button>
+                </div>
+                <div class="pagination-info">
+                    Showing <span id="showing-count">0</span> of <span id="total-count">0</span> records
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="data-table">
+                    <thead>
+                        <tr id="table-header">
+                            <!-- Generated by JS -->
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="brand-icon">🌙</span>
+                <span>RestNTravel Sleep Data</span>
+            </div>
+            <p class="footer-note">Academic Research Platform • IoT + Full-Stack • August 2026</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
