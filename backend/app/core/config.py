@@ -24,5 +24,11 @@ class Settings(BaseSettings):
     sqi_weight_stability: float = 0.25
     sqi_weight_snore: float = 0.10
 
+    # Sleep staging heuristic thresholds
+    stage_deep_motion_max: float = 0.1
+    stage_deep_hr_max: float = 62.0
+    stage_rem_motion_max: float = 0.2
+    stage_rem_hr_min: float = 62.0
+    stage_rem_hr_max: float = 78.0
 
 settings = Settings()

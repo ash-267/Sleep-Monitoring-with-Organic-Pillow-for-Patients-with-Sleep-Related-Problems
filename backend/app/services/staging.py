@@ -6,6 +6,7 @@ from datetime import datetime
 
 import numpy as np
 
+from app.core.config import settings
 from app.services.sleep_analysis import ReadingLike
 
 
@@ -35,9 +36,9 @@ class RuleBasedStageEstimator(StageEstimator):
             dt_minutes = max((current.timestamp - prev.timestamp).total_seconds() / 60.0, 0.0)
             motion = np.sqrt(current.motion_x**2 + current.motion_y**2 + current.motion_z**2)
             hr = current.heart_rate or 70
-            if motion < 0.1 and hr < 62:
+            if motion < settings.stage_deep_motion_max and hr < settings.stage_deep_hr_max:
                 deep += dt_minutes
-            elif motion < 0.2 and 62 <= hr <= 78:
+            elif motion < settings.stage_rem_motion_max and settings.stage_rem_hr_min <= hr <= settings.stage_rem_hr_max:
                 rem += dt_minutes
             else:
                 light += dt_minutes

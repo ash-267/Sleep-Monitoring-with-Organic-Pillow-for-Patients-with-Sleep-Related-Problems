@@ -1,10 +1,11 @@
 from datetime import timezone
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.db.session import get_db
 from app.models import SensorReading, Session as SleepSession
 from app.schemas.common import SensorReadingCreate, SensorReadingRead
@@ -12,7 +13,7 @@ from app.schemas.common import SensorReadingCreate, SensorReadingRead
 router = APIRouter(prefix="/api", tags=["ingest"])
 
 
-@router.post("/ingest", response_model=SensorReadingRead)
+@router.post("/ingest", response_model=SensorReadingRead, dependencies=[Depends(limiter)])
 def ingest_reading(
     payload: SensorReadingCreate,
     db: Session = Depends(get_db),
@@ -32,9 +33,23 @@ def ingest_reading(
     if active_session is None:
         raise HTTPException(status_code=400, detail="Session is not active or does not exist")
 
+    timestamp_utc = payload.timestamp.astimezone(timezone.utc)
+    
+    # Idempotency check: deduplicate on session_id and timestamp
+    existing_reading = db.scalar(
+        select(SensorReading).where(
+            and_(
+                SensorReading.session_id == payload.session_id,
+                SensorReading.timestamp == timestamp_utc,
+            )
+        )
+    )
+    if existing_reading:
+        return existing_reading
+
     reading = SensorReading(
         session_id=payload.session_id,
-        timestamp=payload.timestamp.astimezone(timezone.utc),
+        timestamp=timestamp_utc,
         pressure_1=payload.pressure_1,
         pressure_2=payload.pressure_2,
         pressure_cervical_zone=payload.pressure_cervical_zone,
