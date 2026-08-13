@@ -1,4 +1,9 @@
+import os
+import sys
 from logging.config import fileConfig
+
+# Ensure the project root (/app inside Docker) is on Python's path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool

@@ -55,9 +55,6 @@ class SensorReadingCreate(BaseModel):
     motion_z: float
     heart_rate: float | None = None
     spo2: float | None = None
-    ambient_temperature: float | None = None
-    ambient_humidity: float | None = None
-    snore_event: bool | None = None
 
 
 class SensorReadingRead(SensorReadingCreate):

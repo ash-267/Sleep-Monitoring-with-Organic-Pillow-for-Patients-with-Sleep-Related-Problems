@@ -67,9 +67,6 @@ class SensorReading(Base):
     motion_z: Mapped[float] = mapped_column(Float, nullable=False)
     heart_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
     spo2: Mapped[float | None] = mapped_column(Float, nullable=True)
-    ambient_temperature: Mapped[float | None] = mapped_column(Float, nullable=True)
-    ambient_humidity: Mapped[float | None] = mapped_column(Float, nullable=True)
-    snore_event: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     session: Mapped[Session] = relationship(back_populates="sensor_readings")
 

@@ -45,9 +45,6 @@ def export_csv(
                 "motion_z": r.motion_z,
                 "heart_rate": r.heart_rate,
                 "spo2": r.spo2,
-                "ambient_temperature": r.ambient_temperature,
-                "ambient_humidity": r.ambient_humidity,
-                "snore_event": r.snore_event,
             }
             for r in readings
         ]

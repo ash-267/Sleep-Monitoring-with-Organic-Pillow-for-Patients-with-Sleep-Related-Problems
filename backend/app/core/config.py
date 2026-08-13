@@ -19,10 +19,9 @@ class Settings(BaseSettings):
     waso_motion_threshold: float = 0.35
     waso_hr_spike_bpm: float = 8.0
 
-    sqi_weight_efficiency: float = 0.45
+    sqi_weight_efficiency: float = 0.55
     sqi_weight_movement: float = 0.20
     sqi_weight_stability: float = 0.25
-    sqi_weight_snore: float = 0.10
 
     # Sleep staging heuristic thresholds
     stage_deep_motion_max: float = 0.1

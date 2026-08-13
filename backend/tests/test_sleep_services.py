@@ -26,7 +26,6 @@ def test_estimate_sleep_onset_and_wake_detects_sleep_and_wake():
                 pressure_2=pressure,
                 pressure_cervical_zone=pressure,
                 heart_rate=hr,
-                snore_event=False,
             )
         )
 
@@ -57,7 +56,6 @@ def test_estimate_sleep_with_missing_sensors():
                 pressure_2=pressure,
                 pressure_cervical_zone=None, 
                 heart_rate=None,
-                snore_event=None,
             )
         )
 
@@ -83,7 +81,6 @@ def test_waso_computation():
                 pressure_2=0.8,
                 pressure_cervical_zone=0.8,
                 heart_rate=hr,
-                snore_event=False,
             )
         )
 
@@ -94,7 +91,7 @@ def test_waso_computation():
 
 
 def test_calculate_sqi_in_range():
-    sqi = calculate_sqi(88.0, movement_event_count=5, stability_score=82.0, snore_events=2)
+    sqi = calculate_sqi(88.0, movement_event_count=5, stability_score=82.0)
     assert 0 <= sqi <= 100
     assert sqi > 60
 
@@ -119,7 +116,6 @@ def test_staging_estimation():
                 pressure_2=0.8,
                 pressure_cervical_zone=0.8,
                 heart_rate=hr,
-                snore_event=False,
             )
         )
     estimator = RuleBasedStageEstimator()

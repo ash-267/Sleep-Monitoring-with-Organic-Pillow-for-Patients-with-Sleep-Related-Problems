@@ -58,9 +58,6 @@ def ingest_reading(
         motion_z=payload.motion_z,
         heart_rate=payload.heart_rate,
         spo2=payload.spo2,
-        ambient_temperature=payload.ambient_temperature,
-        ambient_humidity=payload.ambient_humidity,
-        snore_event=payload.snore_event,
     )
     db.add(reading)
     db.commit()

@@ -112,3 +112,68 @@ curl -X POST http://localhost:8000/api/ingest \
 cd backend
 pytest tests/test_sleep_services.py
 ```
+
+## System Architecture (Data Flow)
+
+```ascii
+ [ ESP32-S3 Firmware ]
+  |-- Sensors: MPU6050, FSRs, MAX30102, DHT22
+  |-- Connects via Wi-Fi (retry logic, deduplication)
+  |-- JSON payload over HTTP POST
+        |
+        v
+ [ FastAPI Backend ]
+  |-- Ingest Endpoint (Idempotent, Rate-limited)
+  |-- Validates Device API Key
+  |-- Stages data into Postgres
+        |
+        v
+ [ PostgreSQL DB ] <-- [ Analysis Pipeline ]
+  |-- Tables:          |-- HRV (RMSSD/SDNN)
+      - Participants   |-- WASO / Sleep Efficiency
+      - Sessions       |-- Rule-based Staging
+      - Readings       |-- SQI re-weighting
+      - Metrics
+        |
+        v
+ [ React Frontend ]
+  |-- Vite / Tailwind / Recharts
+  |-- Endpoints: /analytics, /compare, /export
+  |-- Defensible Dashboard (Objective + Subjective stats)
+```
+
+## How to Add a New Sensor Field
+
+To add a new sensor for future experiments, follow these steps across the full stack:
+
+1. **Database Schema (`backend/app/models/entities.py`)**:
+   Add the new field to the `SensorReading` table model:
+   ```python
+   new_sensor_val: Mapped[float | None] = mapped_column(Float, nullable=True)
+   ```
+
+2. **Database Migration (Alembic)**:
+   Generate and apply the migration script:
+   ```bash
+   cd backend
+   alembic revision --autogenerate -m "Add new_sensor_val"
+   alembic upgrade head
+   ```
+
+3. **Pydantic Schema (`backend/app/schemas/common.py`)**:
+   Update `SensorReadingCreate` to accept the new value:
+   ```python
+   new_sensor_val: float | None = Field(default=None, description="New sensor data")
+   ```
+
+4. **Ingest Endpoint (`backend/app/api/ingest.py`)**:
+   Map the payload to the SQLAlchemy object in `ingest_reading()`:
+   ```python
+   new_sensor_val=payload.new_sensor_val
+   ```
+
+5. **Firmware (`firmware/esp32-node/...`)**:
+   Include the field in the outgoing JSON POST payload:
+   ```cpp
+   doc["new_sensor_val"] = sensorRead();
+   ```

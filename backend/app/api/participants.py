@@ -54,6 +54,11 @@ def compare_participant(participant_id: str, db: Session = Depends(get_db)) -> d
 
     baseline_scores = [m.sqi_score for m in db.scalars(select(DerivedMetrics).where(DerivedMetrics.session_id.in_(baseline_ids))).all() if m.sqi_score is not None]
     intervention_scores = [m.sqi_score for m in db.scalars(select(DerivedMetrics).where(DerivedMetrics.session_id.in_(intervention_ids))).all() if m.sqi_score is not None]
+    
+    from app.models import OutcomeMeasure
+    outcomes = db.scalars(select(OutcomeMeasure).where(OutcomeMeasure.participant_id == participant_id)).all()
+    baseline_outcomes = [o.score for o in outcomes if o.session_id in baseline_ids]
+    intervention_outcomes = [o.score for o in outcomes if o.session_id in intervention_ids]
 
     pair_len = min(len(baseline_scores), len(intervention_scores))
     baseline_scores = baseline_scores[:pair_len]
@@ -69,6 +74,8 @@ def compare_participant(participant_id: str, db: Session = Depends(get_db)) -> d
         "pairs": pair_len,
         "baseline_sqi": baseline_scores,
         "intervention_sqi": intervention_scores,
+        "baseline_outcomes": baseline_outcomes,
+        "intervention_outcomes": intervention_outcomes,
         "percent_change": pct_change,
         "stats": result,
     }

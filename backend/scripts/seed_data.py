@@ -46,9 +46,6 @@ def seed() -> None:
                     motion_z=random.gauss(motion_base, 0.05),
                     heart_rate=max(45, random.gauss(64, 4)),
                     spo2=random.gauss(97, 1.2),
-                    ambient_temperature=random.gauss(24, 1.0),
-                    ambient_humidity=random.gauss(55, 3.0),
-                    snore_event=(idx % 47 == 0),
                 )
                 db.add(reading)
                 timestamp += timedelta(minutes=1)

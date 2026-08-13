@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import traceback
 
 from app.api import analytics, export, health, ingest, participants, sessions
 from app.core.config import settings
@@ -23,7 +24,12 @@ app.include_router(participants.router)
 app.include_router(export.router)
 app.include_router(analytics.router)
 
-
 @app.on_event("startup")
 def startup() -> None:
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database connected and tables created!")
+    except Exception as e:
+        print("Failed to connect to database at startup:")
+        traceback.print_exc()
+        # Do not crash the container so we can debug!

@@ -19,7 +19,6 @@ class ReadingLike:
     pressure_2: float
     pressure_cervical_zone: float | None
     heart_rate: float | None
-    snore_event: bool | None
 
 
 def _motion_magnitude(reading: ReadingLike) -> float:

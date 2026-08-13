@@ -38,9 +38,12 @@ def compute_session_metrics(db: Session, session_id) -> DerivedMetrics:
     rmssd, sdnn, lf_hf = calculate_hrv_features([r.heart_rate for r in readings])
     stage_summary = RuleBasedStageEstimator().estimate(readings, onset, wake)
 
-    stability = max(0.0, min(100.0, 100.0 - (np.std([r.heart_rate for r in readings if r.heart_rate is not None]) if readings else 0.0) * 2.0))
-    snore_count = sum(1 for r in readings if r.snore_event)
-    sqi = calculate_sqi(sleep_efficiency, movement_count, float(stability), snore_count)
+    hr_values = [r.heart_rate for r in readings if r.heart_rate is not None]
+    stability = None
+    if hr_values:
+        stability = float(max(0.0, min(100.0, 100.0 - (np.std(hr_values)) * 2.0)))
+
+    sqi = calculate_sqi(sleep_efficiency, movement_count, stability)
 
     metrics = db.get(DerivedMetrics, session_id)
     if metrics is None:

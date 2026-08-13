@@ -57,9 +57,6 @@ def upgrade() -> None:
         sa.Column("motion_z", sa.Float(), nullable=False),
         sa.Column("heart_rate", sa.Float(), nullable=True),
         sa.Column("spo2", sa.Float(), nullable=True),
-        sa.Column("ambient_temperature", sa.Float(), nullable=True),
-        sa.Column("ambient_humidity", sa.Float(), nullable=True),
-        sa.Column("snore_event", sa.Boolean(), nullable=True),
     )
 
     op.create_table(
