@@ -2,7 +2,7 @@
 
 Academic full-stack IoT platform for comparing sleep outcomes between baseline pillows and the RestNTravel organic rice-grass pillow.
 
-> **Research-use only disclaimer:** Sleep stage estimates are surrogate, rule-based approximations (HRV + motion + respiration proxies) and are **not clinical-grade**. Accuracy ceiling target disclosure: Cohen's κ 0.4–0.7 vs PSG.
+> **Research-use only disclaimer:** Sleep stage estimates are surrogate, rule-based approximations (HRV + motion proxies) and are **not clinical-grade**. Accuracy ceiling target disclosure: Cohen's κ 0.4–0.7 vs PSG.
 
 ## Repository layout
 
