@@ -181,25 +181,25 @@ function renderKPIGrid(before, after) {
 
     grid.innerHTML = `
         <div class="kpi-card violet">
-            <div class="kpi-icon">📊</div>
+            <div class="kpi-icon"></div>
             <div class="kpi-value">${overallQScore.toFixed(1)}</div>
             <div class="kpi-label">Average sleep score</div>
             ${getChangeHtml(mean(before, "Sleep_Quality_Score"), mean(after, "Sleep_Quality_Score"))}
         </div>
         <div class="kpi-card emerald">
-            <div class="kpi-icon">💤</div>
+            <div class="kpi-icon"></div>
             <div class="kpi-value">${avgDeep.toFixed(1)}%</div>
             <div class="kpi-label">Average Deep Sleep</div>
             ${getChangeHtml(mean(before, "Deep_Sleep_pct"), mean(after, "Deep_Sleep_pct"))}
         </div>
         <div class="kpi-card amber">
-            <div class="kpi-icon">📉</div>
+            <div class="kpi-icon"></div>
             <div class="kpi-value">${avgDisturbAfter.toFixed(1)}</div>
             <div class="kpi-label">Avg Disturbances (After)</div>
             ${getChangeHtml(avgDisturbBefore, avgDisturbAfter, true)}
         </div>
         <div class="kpi-card blue">
-            <div class="kpi-icon">⏱️</div>
+            <div class="kpi-icon"></div>
             <div class="kpi-value">${mean(after, "Sleep_Duration_hr").toFixed(2)}h</div>
             <div class="kpi-label">Duration (After)</div>
             ${getChangeHtml(mean(before, "Sleep_Duration_hr"), mean(after, "Sleep_Duration_hr"))}
