@@ -183,13 +183,13 @@ function renderKPIGrid(before, after) {
         <div class="kpi-card violet">
             <div class="kpi-icon">📊</div>
             <div class="kpi-value">${overallQScore.toFixed(1)}</div>
-            <div class="kpi-label">Cohort Avg Score</div>
+            <div class="kpi-label">Average sleep score</div>
             ${getChangeHtml(mean(before, "Sleep_Quality_Score"), mean(after, "Sleep_Quality_Score"))}
         </div>
         <div class="kpi-card emerald">
             <div class="kpi-icon">💤</div>
             <div class="kpi-value">${avgDeep.toFixed(1)}%</div>
-            <div class="kpi-label">Cohor Avg Deep Sleep</div>
+            <div class="kpi-label">Average Deep Sleep</div>
             ${getChangeHtml(mean(before, "Deep_Sleep_pct"), mean(after, "Deep_Sleep_pct"))}
         </div>
         <div class="kpi-card amber">
